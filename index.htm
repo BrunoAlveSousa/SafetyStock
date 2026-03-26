@@ -368,9 +368,231 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px;
 }
 
 .no-match { text-align: center; padding: 40px; color: var(--gray-400); font-size: 13px; }
+
+/* ===================== SIMULATION PANEL ===================== */
+.sim-fab {
+  position: fixed; bottom: 28px; left: 28px; z-index: 150;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white; border: none; cursor: pointer; font-size: 22px;
+  box-shadow: 0 4px 16px rgba(109,40,217,0.45);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.25s; outline: none;
+}
+.sim-fab:hover { transform: scale(1.1) rotate(15deg); box-shadow: 0 6px 24px rgba(109,40,217,0.6); }
+.sim-fab .sim-fab-badge {
+  position: absolute; top: -4px; right: -4px; width: 18px; height: 18px;
+  background: var(--orange-500); border-radius: 50%; border: 2px solid white;
+  font-size: 10px; font-weight: 800; display: none; align-items: center; justify-content: center;
+}
+.sim-fab .sim-fab-badge.visible { display: flex; }
+
+.sim-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 520px; max-width: 95vw;
+  background: white; z-index: 200;
+  box-shadow: -4px 0 32px rgba(0,0,0,0.15);
+  display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.sim-drawer.open { transform: translateX(0); }
+.sim-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 190;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px);
+}
+.sim-overlay.open { opacity: 1; pointer-events: all; }
+
+.sim-header {
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--gray-200);
+  display: flex; align-items: flex-start; justify-content: space-between; flex-shrink: 0;
+}
+.sim-header-left h2 { font-size: 16px; font-weight: 800; color: var(--gray-900); margin-bottom: 2px; }
+.sim-header-left p { font-size: 12px; color: var(--gray-500); }
+.sim-close {
+  width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--gray-200);
+  background: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--gray-500); font-size: 16px; transition: all 0.15s;
+}
+.sim-close:hover { background: var(--gray-100); color: var(--gray-900); }
+
+.sim-scope {
+  padding: 16px 24px; background: var(--gray-50); border-bottom: 1px solid var(--gray-200);
+  display: flex; gap: 10px; align-items: center; flex-shrink: 0; flex-wrap: wrap;
+}
+.sim-scope-label { font-size: 11px; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+.sim-select {
+  padding: 6px 10px; border: 1.5px solid var(--gray-200); border-radius: 8px;
+  font-family: "Sora", sans-serif; font-size: 13px; color: var(--gray-700);
+  background: white; transition: all 0.2s; flex: 1; min-width: 100px;
+}
+.sim-select:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+
+.sim-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+.sim-section-title {
+  font-size: 11px; font-weight: 700; color: var(--gray-500);
+  text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.sim-section-title::before {
+  content: ""; display: block; width: 3px; height: 13px;
+  background: #7c3aed; border-radius: 2px;
+}
+
+.sim-pairs { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+.sim-pair {
+  background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: 12px;
+  padding: 16px; transition: border-color 0.2s;
+}
+.sim-pair.modified { border-color: #a78bfa; background: #faf5ff; }
+.sim-pair-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
+}
+.sim-pair-title { font-size: 13px; font-weight: 700; color: var(--gray-900); }
+.sim-pair-sub { font-size: 11px; color: var(--gray-500); margin-top: 1px; }
+.sim-reset-btn {
+  padding: 3px 10px; border-radius: 6px; border: 1.5px solid var(--gray-200);
+  font-family: "Sora", sans-serif; font-size: 11px; font-weight: 600;
+  cursor: pointer; background: white; color: var(--gray-500); transition: all 0.15s;
+  display: none;
+}
+.sim-pair.modified .sim-reset-btn { display: block; }
+.sim-reset-btn:hover { border-color: var(--red-500); color: var(--red-500); }
+
+.sim-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.sim-field label {
+  display: block; font-size: 11px; font-weight: 600; color: var(--gray-500);
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px;
+}
+.sim-field-wrap { position: relative; }
+.sim-field input {
+  width: 100%; padding: 8px 36px 8px 10px;
+  border: 1.5px solid var(--gray-200); border-radius: 8px;
+  font-family: "JetBrains Mono", monospace; font-size: 13px; color: var(--gray-800);
+  background: white; transition: all 0.2s;
+}
+.sim-field input:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+.sim-field input.changed { border-color: #a78bfa; background: #faf5ff; color: #5b21b6; font-weight: 600; }
+.sim-field-unit {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 10px; color: var(--gray-400); font-weight: 600; pointer-events: none;
+}
+.sim-original {
+  font-size: 10px; color: var(--gray-400); margin-top: 3px;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.sim-impact {
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe); border: 1.5px solid #c4b5fd;
+  border-radius: 12px; padding: 16px; margin-bottom: 20px;
+}
+.sim-impact-title { font-size: 12px; font-weight: 700; color: #5b21b6; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.sim-impact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sim-impact-item { background: white; border-radius: 8px; padding: 10px 12px; }
+.sim-impact-item-label { font-size: 10px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+.sim-impact-item-val { font-size: 16px; font-weight: 800; color: var(--gray-900); font-family: "JetBrains Mono", monospace; }
+.sim-impact-item-delta { font-size: 11px; font-weight: 600; margin-top: 2px; }
+.delta-pos { color: var(--orange-500); }
+.delta-neg { color: var(--green-600); }
+.delta-zero { color: var(--gray-400); }
+
+.sim-footer {
+  padding: 16px 24px; border-top: 1px solid var(--gray-200); flex-shrink: 0;
+  display: flex; gap: 10px;
+}
+.sim-apply {
+  flex: 1; padding: 12px; background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white; border: none; border-radius: 10px;
+  font-family: "Sora", sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+}
+.sim-apply:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(109,40,217,0.4); }
+.sim-apply:active { transform: none; }
+.sim-reset-all {
+  padding: 12px 16px; background: white; color: var(--gray-600);
+  border: 1.5px solid var(--gray-200); border-radius: 10px;
+  font-family: "Sora", sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.sim-reset-all:hover { border-color: var(--red-500); color: var(--red-500); }
+
+/* Table highlight for simulated rows */
+tr.sim-modified td { background: #faf5ff !important; }
+tr.sim-modified td.cell-green { color: #5b21b6 !important; }
+.sim-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: #ede9fe; color: #6d28d9; border-radius: 4px;
+  font-size: 10px; font-weight: 700; padding: 1px 6px; margin-left: 4px; vertical-align: middle;
+}
+.sim-mode-banner {
+  background: linear-gradient(90deg, #7c3aed, #6d28d9); color: white;
+  padding: 8px 32px; font-size: 12px; font-weight: 600;
+  display: none; align-items: center; justify-content: center; gap: 12px;
+  position: sticky; top: 64px; z-index: 90;
+}
+.sim-mode-banner.active { display: flex; }
+.sim-mode-banner button {
+  background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+  color: white; border-radius: 6px; padding: 3px 12px;
+  font-family: "Sora", sans-serif; font-size: 11px; font-weight: 700; cursor: pointer;
+}
+.sim-mode-banner button:hover { background: rgba(255,255,255,0.35); }
+
 </style>
 </head>
 <body>
+
+
+<!-- SIM BANNER -->
+<div class="sim-mode-banner" id="simBanner">
+  <span>⚗️</span>
+  <span>Modo Simulação ativo — Lead times alterados em <strong id="simBannerCount">0</strong> combinação(ões)</span>
+  <button onclick="resetAllSim()">Resetar tudo</button>
+  <button onclick="openSimDrawer()">Ver simulação</button>
+</div>
+
+<!-- FAB -->
+<button class="sim-fab" id="simFab" onclick="openSimDrawer()" title="Simulador de Lead Time" style="display:none">
+  ⚗️
+  <span class="sim-fab-badge" id="simFabBadge">0</span>
+</button>
+
+<!-- OVERLAY -->
+<div class="sim-overlay" id="simOverlay" onclick="closeSimDrawer()"></div>
+
+<!-- DRAWER -->
+<div class="sim-drawer" id="simDrawer">
+  <div class="sim-header">
+    <div class="sim-header-left">
+      <h2>⚗️ Simulador de Lead Time</h2>
+      <p>Altere média e desvio por Empresa + Classe e veja o impacto em tempo real</p>
+    </div>
+    <button class="sim-close" onclick="closeSimDrawer()">✕</button>
+  </div>
+
+  <div class="sim-scope">
+    <span class="sim-scope-label">Filtrar por</span>
+    <select class="sim-select" id="simFilterEmpresa" onchange="renderSimPairs()">
+      <option value="">Todas empresas</option>
+    </select>
+    <select class="sim-select" id="simFilterClasse" onchange="renderSimPairs()">
+      <option value="">Todas classes</option>
+    </select>
+  </div>
+
+  <div class="sim-body" id="simBody">
+    <div style="text-align:center;padding:40px;color:var(--gray-400)">
+      <div style="font-size:32px;margin-bottom:12px">📊</div>
+      <div style="font-size:14px;font-weight:600;color:var(--gray-500)">Carregue uma planilha para começar</div>
+    </div>
+  </div>
+
+  <div class="sim-footer">
+    <button class="sim-reset-all" onclick="resetAllSim()">Resetar tudo</button>
+    <button class="sim-apply" onclick="applySimulation()">
+      ✓ Aplicar simulação
+    </button>
+  </div>
+</div>
 
 <div class="loading-bar" id="loadingBar"></div>
 
@@ -982,6 +1204,384 @@ function showToast(msg, type='') {
 document.getElementById('slModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+</script>
+
+<script>
+
+// ===================== SIMULATION ENGINE =====================
+// ltOverrides: { "SIGLA|CLASSE": { ltMedio, ltDesvio } }
+let ltOverrides = {};
+let simActive = false;
+
+function openSimDrawer() {
+  if (!allRows.length) { showToast('⚠️ Carregue uma planilha primeiro', 'error'); return; }
+  populateSimFilters();
+  renderSimPairs();
+  document.getElementById('simDrawer').classList.add('open');
+  document.getElementById('simOverlay').classList.add('open');
+}
+function closeSimDrawer() {
+  document.getElementById('simDrawer').classList.remove('open');
+  document.getElementById('simOverlay').classList.remove('open');
+}
+
+function populateSimFilters() {
+  const empresas = [...new Set(allRows.map(r => r.empresa))].sort();
+  const classes  = [...new Set(allRows.map(r => r.classe))].sort((a,b)=>+a-+b);
+  const es = document.getElementById('simFilterEmpresa');
+  const cs = document.getElementById('simFilterClasse');
+  es.innerHTML = '<option value="">Todas empresas</option>' + empresas.map(e=>`<option>${e}</option>`).join('');
+  cs.innerHTML = '<option value="">Todas classes</option>'  + classes.map(c=>`<option>${c}</option>`).join('');
+}
+
+function getSimPairs() {
+  // Unique empresa+classe combinations from allRows
+  const seen = new Set();
+  const pairs = [];
+  allRows.forEach(r => {
+    const k = r.empresa + '|' + r.classe;
+    if (!seen.has(k)) { seen.add(k); pairs.push({ empresa: r.empresa, classe: r.classe, key: k }); }
+  });
+  pairs.sort((a,b) => a.empresa.localeCompare(b.empresa) || +a.classe - +b.classe);
+  return pairs;
+}
+
+function renderSimPairs() {
+  const fEmp = document.getElementById('simFilterEmpresa').value;
+  const fCls = document.getElementById('simFilterClasse').value;
+  let pairs = getSimPairs();
+  if (fEmp) pairs = pairs.filter(p => p.empresa === fEmp);
+  if (fCls) pairs = pairs.filter(p => p.classe === fCls);
+
+  if (!pairs.length) {
+    document.getElementById('simBody').innerHTML = '<div class="no-match" style="padding:40px">Nenhuma combinação encontrada para os filtros selecionados.</div>';
+    return;
+  }
+
+  // Compute live impact summary
+  const modCount = Object.keys(ltOverrides).length;
+  let impactHTML = '';
+  if (modCount > 0) {
+    const orig = computeTotals(allRows, false);
+    const sim  = computeTotals(allRows, true);
+    const dVal  = sim.totalCalcVal - orig.totalCalcVal;
+    const dCob  = sim.cobCalc - orig.cobCalc;
+    const dValClass  = dVal  >= 0 ? 'delta-pos' : 'delta-neg';
+    const dCobClass  = dCob  >= 0 ? 'delta-pos' : 'delta-neg';
+    impactHTML = `
+    <div class="sim-impact">
+      <div class="sim-impact-title">📊 Impacto da simulação (${modCount} alteração${modCount>1?'ões':''})</div>
+      <div class="sim-impact-grid">
+        <div class="sim-impact-item">
+          <div class="sim-impact-item-label">ES Calculado</div>
+          <div class="sim-impact-item-val">${fmtBRL(sim.totalCalcVal)}</div>
+          <div class="sim-impact-item-delta ${dValClass}">${dVal>=0?'+':''}${fmtBRL(dVal)} vs. original</div>
+        </div>
+        <div class="sim-impact-item">
+          <div class="sim-impact-item-label">Cobertura Sugerida</div>
+          <div class="sim-impact-item-val">${fmtNum(sim.cobCalc)} m</div>
+          <div class="sim-impact-item-delta ${dCobClass}">${dCob>=0?'+':''}${fmtNum(dCob)} m vs. original</div>
+        </div>
+        <div class="sim-impact-item">
+          <div class="sim-impact-item-label">SKUs impactados</div>
+          <div class="sim-impact-item-val">${sim.impacted}</div>
+          <div class="sim-impact-item-delta delta-zero">de ${allRows.length} total</div>
+        </div>
+        <div class="sim-impact-item">
+          <div class="sim-impact-item-label">Δ Incremental</div>
+          <div class="sim-impact-item-val ${dVal>=0?'delta-pos':'delta-neg'}">${dVal>=0?'+':''}${fmtBRL(dVal)}</div>
+          <div class="sim-impact-item-delta delta-zero">vs. parâmetros originais</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const pairsHTML = pairs.map(p => {
+    const orig = ltMap[p.key.toUpperCase()] || { ltMedio: 0, ltDesvio: 0 };
+    const ov   = ltOverrides[p.key.toUpperCase()] || {};
+    const curMedia  = ov.ltMedio  !== undefined ? ov.ltMedio  : orig.ltMedio;
+    const curDesvio = ov.ltDesvio !== undefined ? ov.ltDesvio : orig.ltDesvio;
+    const isModified = ov.ltMedio !== undefined || ov.ltDesvio !== undefined;
+    const pairId = p.key.replace(/[^a-zA-Z0-9]/g,'_');
+    return `
+    <div class="sim-pair ${isModified?'modified':''}" id="pair_${pairId}">
+      <div class="sim-pair-header">
+        <div>
+          <div class="sim-pair-title">${p.empresa} — Classe ${p.classe}</div>
+          <div class="sim-pair-sub">Chave: ${p.key.toUpperCase()}${isModified?' <span style=\"color:#7c3aed;font-weight:700\">• Alterado</span>':''}</div>
+        </div>
+        <button class="sim-reset-btn" onclick="resetPair('${p.key.toUpperCase()}','${pairId}')">↺ Resetar</button>
+      </div>
+      <div class="sim-fields">
+        <div class="sim-field">
+          <label>Lead Time Médio</label>
+          <div class="sim-field-wrap">
+            <input type="number" step="0.01" min="0"
+              id="lt_media_${pairId}"
+              value="${fmtNum(curMedia,4)}"
+              data-orig="${orig.ltMedio}"
+              data-key="${p.key.toUpperCase()}"
+              data-field="ltMedio"
+              oninput="onSimInput(this,'${pairId}')"
+              class="${isModified && ov.ltMedio!==undefined?'changed':''}">
+            <span class="sim-field-unit">meses</span>
+          </div>
+          <div class="sim-original">Original: ${fmtNum(orig.ltMedio,4)} meses</div>
+        </div>
+        <div class="sim-field">
+          <label>Desvio Padrão LT</label>
+          <div class="sim-field-wrap">
+            <input type="number" step="0.01" min="0"
+              id="lt_desvio_${pairId}"
+              value="${fmtNum(curDesvio,4)}"
+              data-orig="${orig.ltDesvio}"
+              data-key="${p.key.toUpperCase()}"
+              data-field="ltDesvio"
+              oninput="onSimInput(this,'${pairId}')"
+              class="${isModified && ov.ltDesvio!==undefined?'changed':''}">
+            <span class="sim-field-unit">meses</span>
+          </div>
+          <div class="sim-original">Original: ${fmtNum(orig.ltDesvio,4)} meses</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('simBody').innerHTML =
+    `<div class="sim-section-title" style="margin-bottom:${modCount?'0':'12'}px">
+       ${modCount ? '⚗️ Parâmetros de Simulação' : 'Parâmetros de Lead Time'}
+     </div>` +
+    impactHTML +
+    `<div class="sim-pairs">${pairsHTML}</div>`;
+}
+
+function onSimInput(input, pairId) {
+  const key   = input.dataset.key;
+  const field = input.dataset.field;
+  const orig  = parseFloat(input.dataset.orig);
+  const val   = parseFloat(input.value);
+  if (!ltOverrides[key]) ltOverrides[key] = {};
+  if (!isNaN(val) && val !== orig) {
+    ltOverrides[key][field] = val;
+    input.classList.add('changed');
+  } else {
+    delete ltOverrides[key][field];
+    input.classList.remove('changed');
+    if (Object.keys(ltOverrides[key]).length === 0) delete ltOverrides[key];
+  }
+  // Mark pair card
+  const pairEl = document.getElementById('pair_' + pairId);
+  const isModified = ltOverrides[key] && Object.keys(ltOverrides[key]).length > 0;
+  pairEl.classList.toggle('modified', isModified);
+  pairEl.querySelector('.sim-pair-sub').innerHTML =
+    `Chave: ${key}${isModified?' <span style="color:#7c3aed;font-weight:700">• Alterado</span>':''}`;
+
+  updateSimBadge();
+  // Re-render impact block without losing focus
+  const modCount = Object.keys(ltOverrides).length;
+  if (modCount > 0) {
+    const orig2 = computeTotals(allRows, false);
+    const sim2  = computeTotals(allRows, true);
+    const dVal  = sim2.totalCalcVal - orig2.totalCalcVal;
+    const dCob  = sim2.cobCalc - orig2.cobCalc;
+    const dValClass = dVal >= 0 ? 'delta-pos' : 'delta-neg';
+    const dCobClass = dCob >= 0 ? 'delta-pos' : 'delta-neg';
+    // update existing impact block if present, else prepend
+    let impact = document.querySelector('.sim-impact');
+    const newImpactHTML = `
+      <div class="sim-impact-title">📊 Impacto da simulação (${modCount} alteração${modCount>1?'ões':''})</div>
+      <div class="sim-impact-grid">
+        <div class="sim-impact-item">
+          <div class="sim-impact-item-label">ES Calculado</div>
+          <div class="sim-impact-item-val">${fmtBRL(sim2.totalCalcVal)}</div>
+          <div class="sim-impact-item-delta ${dValClass}">${dVal>=0?'+':''}${fmtBRL(dVal)} vs. original</div>
+        </div>
+        <div class="sim-impact-item">
+          <div class="sim-impact-item-label">Cobertura Sugerida</div>
+          <div class="sim-impact-item-val">${fmtNum(sim2.cobCalc)} m</div>
+          <div class="sim-impact-item-delta ${dCobClass}">${dCob>=0?'+':''}${fmtNum(dCob)} m vs. original</div>
+        </div>
+        <div class="sim-impact-item">
+          <div class="sim-impact-item-label">SKUs impactados</div>
+          <div class="sim-impact-item-val">${sim2.impacted}</div>
+          <div class="sim-impact-item-delta delta-zero">de ${allRows.length} total</div>
+        </div>
+        <div class="sim-impact-item">
+          <div class="sim-impact-item-label">Δ Incremental</div>
+          <div class="sim-impact-item-val ${dVal>=0?'delta-pos':'delta-neg'}">${dVal>=0?'+':''}${fmtBRL(dVal)}</div>
+          <div class="sim-impact-item-delta delta-zero">vs. parâmetros originais</div>
+        </div>
+      </div>`;
+    if (impact) {
+      impact.innerHTML = newImpactHTML;
+    } else {
+      const sectionTitle = document.querySelector('#simBody .sim-section-title');
+      if (sectionTitle) {
+        const div = document.createElement('div'); div.className = 'sim-impact';
+        div.innerHTML = newImpactHTML; sectionTitle.after(div);
+      }
+    }
+  } else {
+    const impact = document.querySelector('.sim-impact');
+    if (impact) impact.remove();
+  }
+}
+
+function resetPair(key, pairId) {
+  delete ltOverrides[key];
+  updateSimBadge();
+  renderSimPairs();
+}
+
+function resetAllSim() {
+  ltOverrides = {};
+  simActive = false;
+  updateSimBadge();
+  // Rebuild rows without overrides
+  recalcES();
+  renderSimPairs();
+  showToast('↺ Simulação resetada — parâmetros originais restaurados');
+}
+
+function updateSimBadge() {
+  const count = Object.keys(ltOverrides).length;
+  const badge = document.getElementById('simFabBadge');
+  badge.textContent = count;
+  badge.classList.toggle('visible', count > 0);
+  document.getElementById('simBannerCount').textContent = count;
+  document.getElementById('simBanner').classList.toggle('active', count > 0 && simActive);
+}
+
+function computeTotals(rows, useSim) {
+  const Z = getZ(currentSL);
+  let totalCalcVal = 0, totalCobNum = 0, totalCobDen = 0, impacted = 0;
+  rows.forEach(r => {
+    let LT = r.LT, sigmaLT = r.sigmaLT;
+    const key = (r.empresa + '|' + r.classe).toUpperCase();
+    if (useSim && ltOverrides[key]) {
+      if (ltOverrides[key].ltMedio  !== undefined) LT = ltOverrides[key].ltMedio;
+      if (ltOverrides[key].ltDesvio !== undefined) sigmaLT = ltOverrides[key].ltDesvio;
+      impacted++;
+    }
+    const esCalc = (LT > 0 || sigmaLT > 0)
+      ? Math.round(Z * Math.sqrt(LT * r.sigmaD * r.sigmaD + sigmaLT * sigmaLT * r.D * r.D))
+      : 0;
+    totalCalcVal += esCalc * r.valorUnit;
+    totalCobNum  += esCalc;
+    totalCobDen  += r.cmm12;
+  });
+  return {
+    totalCalcVal,
+    cobCalc: totalCobDen > 0 ? totalCobNum / totalCobDen : 0,
+    impacted: useSim ? impacted : 0
+  };
+}
+
+function applySimulation() {
+  if (Object.keys(ltOverrides).length === 0) {
+    showToast('⚠️ Nenhum parâmetro alterado ainda', 'error'); return;
+  }
+  simActive = true;
+  // Recompute allRows with overrides
+  const Z = getZ(currentSL);
+  allRows = allRows.map(r => {
+    let LT = r.LT, sigmaLT = r.sigmaLT;
+    const key = (r.empresa + '|' + r.classe).toUpperCase();
+    if (ltOverrides[key]) {
+      if (ltOverrides[key].ltMedio  !== undefined) LT = ltOverrides[key].ltMedio;
+      if (ltOverrides[key].ltDesvio !== undefined) sigmaLT = ltOverrides[key].ltDesvio;
+    }
+    const esCalc = (LT > 0 || sigmaLT > 0)
+      ? Math.round(Z * Math.sqrt(LT * r.sigmaD * r.sigmaD + sigmaLT * sigmaLT * r.D * r.D))
+      : 0;
+    const isSimRow = ltOverrides[key] && Object.keys(ltOverrides[key]).length > 0;
+    return {
+      ...r, LT, sigmaLT, esCalc,
+      valorEsCalc: esCalc * r.valorUnit,
+      cobSugerida: r.cmm12 > 0 ? esCalc / r.cmm12 : 0,
+      simulated: isSimRow,
+    };
+  });
+  updateSimBadge();
+  applyFilters();
+  closeSimDrawer();
+  const count = Object.keys(ltOverrides).length;
+  showToast(`⚗️ Simulação aplicada — ${count} combinação${count>1?'ões':''} de lead time alterada${count>1?'s':''}`, 'success');
+}
+
+// Override renderTable to show simulation highlights
+const _origRenderTable = renderTable;
+renderTable = function() {
+  const body = document.getElementById('tableBody');
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageRows = filteredRows.slice(start, start + PAGE_SIZE);
+
+  if (filteredRows.length === 0) {
+    body.innerHTML = '<tr><td colspan="13" class="no-match">Nenhum SKU encontrado com os filtros selecionados.</td></tr>';
+    document.getElementById('pagination').innerHTML = '';
+    return;
+  }
+
+  body.innerHTML = pageRows.map(r => {
+    const abcClass = 'abc-' + (r.abc || 'C');
+    const cobAtualClass = r.cobAtual > 3 ? 'cell-orange' : r.cobAtual === 0 ? 'cell-muted' : '';
+    const cobCalcClass  = r.cobSugerida > 3 ? 'cell-orange' : r.cobSugerida === 0 ? 'cell-muted' : '';
+    const simBadge = r.simulated ? '<span class="sim-badge">⚗ sim</span>' : '';
+    const trClass = r.simulated ? 'sim-modified' : '';
+    return `<tr class="${trClass}">
+      <td class="cell-empresa">${r.empresa}</td>
+      <td class="cell-mat">${r.classe}</td>
+      <td class="cell-mat">${r.codMat}</td>
+      <td><span class="cell-desc" title="${r.descricao}">${r.descricao}</span></td>
+      <td><span class="abc-tag ${abcClass}">${r.abc || '–'}</span></td>
+      <td class="cell-num">${fmtNum(r.cmm12, 2)}</td>
+      <td class="cell-num">${fmtBRL(r.valorUnit)}</td>
+      <td class="cell-num">${fmtInt(r.esAtual)}</td>
+      <td class="cell-num">${fmtBRL(r.valorEsAtual)}</td>
+      <td class="cell-num cell-green">${fmtInt(r.esCalc)}${simBadge}</td>
+      <td class="cell-num cell-green">${fmtBRL(r.valorEsCalc)}</td>
+      <td class="cell-num ${cobAtualClass}">${fmtNum(r.cobAtual)}</td>
+      <td class="cell-num ${cobCalcClass}">${fmtNum(r.cobSugerida)}</td>
+    </tr>`;
+  }).join('');
+
+  renderPagination();
+};
+
+// Show FAB after data is loaded — patch buildRows
+const _origBuildRows = buildRows;
+buildRows = function(data) {
+  _origBuildRows(data);
+  document.getElementById('simFab').style.display = 'flex';
+  populateSimFilters();
+};
+
+// Export: include simulation flag
+const _origExport = exportExcel;
+exportExcel = function() {
+  if (!filteredRows.length) { showToast('⚠️ Nenhum dado para exportar', 'error'); return; }
+  const headers = ['Empresa','Classe','Cod. Material','Descrição','ABC','CMM12','Valor Unitário',
+    'ES Atual (qtd)','Valor ES Atual (R$)','ES Calculado (qtd)','Valor ES Calculado (R$)',
+    'Cobertura Atual (meses)','Cobertura Sugerida (meses)','Simulado (LT)'];
+  const data = filteredRows.map(r => [
+    r.empresa, r.classe, r.codMat, r.descricao, r.abc,
+    r.cmm12, r.valorUnit, r.esAtual,
+    parseFloat(r.valorEsAtual.toFixed(2)),
+    r.esCalc,
+    parseFloat(r.valorEsCalc.toFixed(2)),
+    parseFloat(r.cobAtual.toFixed(4)),
+    parseFloat(r.cobSugerida.toFixed(4)),
+    r.simulated ? 'Sim' : ''
+  ]);
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+  ws['!cols'] = [8,8,12,30,5,8,12,10,16,12,16,14,14,10].map(w => ({ wch: w }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Estoque de Segurança');
+  XLSX.writeFile(wb, 'ES_Calculado_' + new Date().toISOString().slice(0,10) + '.xlsx');
+  showToast('📥 Relatório exportado!', 'success');
+};
+
+
 </script>
 </body>
 </html>
